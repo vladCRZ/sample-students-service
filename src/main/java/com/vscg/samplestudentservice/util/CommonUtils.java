@@ -23,14 +23,12 @@ public class CommonUtils {
         }
         String pattern = "yyyy-MM-dd";
         SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        sdf.setLenient(false); // Disallow lenient parsing to ensure strict matching
+        sdf.setLenient(false);
 
         try {
-            // Attempt to parse the date with the specified pattern
             return sdf.parse(date);
 
         } catch (ParseException e) {
-            // If parsing fails, it means the date does not match the pattern,
             throw new InvalidDataException("dateOfBirth must be in yyyy-mm-dd format.");
         }
     }

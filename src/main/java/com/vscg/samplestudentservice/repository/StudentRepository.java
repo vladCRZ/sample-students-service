@@ -1,4 +1,4 @@
-package com.vscg.samplestudentservice.model.repository;
+package com.vscg.samplestudentservice.repository;
 
 import com.vscg.samplestudentservice.model.Student;
 import org.springframework.data.domain.Page;

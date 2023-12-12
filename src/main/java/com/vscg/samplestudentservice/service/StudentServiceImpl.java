@@ -10,7 +10,7 @@ import com.vscg.samplestudentservice.exception.DataMissingException;
 import com.vscg.samplestudentservice.exception.DataNotModifiedException;
 import com.vscg.samplestudentservice.exception.ResourceNotFoundException;
 import com.vscg.samplestudentservice.model.Student;
-import com.vscg.samplestudentservice.model.repository.StudentRepository;
+import com.vscg.samplestudentservice.repository.StudentRepository;
 import com.vscg.samplestudentservice.util.CommonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
