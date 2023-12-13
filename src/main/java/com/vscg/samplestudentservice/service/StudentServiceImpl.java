@@ -30,7 +30,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public StudentResponse addStudent(StudentRequest studentRequest) {
-        LOGGER.info("addStudent invoked...");
+        LOGGER.info("addStudent invoked....");
 
         if (studentRequest.getFirstName() == null || studentRequest.getFirstName().isEmpty()) {
             throw new DataMissingException("firstName is required.");
