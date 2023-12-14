@@ -2,9 +2,14 @@ package com.vscg.samplestudentservice;
 
 import com.vscg.samplestudentservice.dto.StudentRequest;
 import com.vscg.samplestudentservice.dto.StudentResponse;
+import com.vscg.samplestudentservice.exception.DataMissingException;
+import com.vscg.samplestudentservice.exception.DataNotModifiedException;
+import com.vscg.samplestudentservice.exception.InvalidDataException;
+import com.vscg.samplestudentservice.exception.ResourceNotFoundException;
 import com.vscg.samplestudentservice.model.Student;
 import com.vscg.samplestudentservice.repository.StudentRepository;
 import com.vscg.samplestudentservice.service.StudentServiceImpl;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -16,8 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import com.vscg.samplestudentservice.util.CommonUtils;
@@ -63,6 +67,25 @@ class StudentServiceApplicationTests {
     }
 
     @Test
+    public void testAddStudentWithMissingData() {
+        StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setStudentId("id");
+        studentRequest.setFirstName("");
+        studentRequest.setLastName("lastName");
+        studentRequest.setEmail("email");
+        studentRequest.setMobileNumber("mobileNumber");
+
+        DataMissingException dataMissingException = assertThrows(DataMissingException.class, () -> {
+            studentService.addStudent(studentRequest);
+        });
+        assertEquals("firstName is required.", dataMissingException.getMessage());
+
+    }
+
+
+
+
+    @Test
     public void testUpdateStudent() {
         StudentRequest studentRequest = new StudentRequest();
         studentRequest.setStudentId("id");
@@ -98,6 +121,63 @@ class StudentServiceApplicationTests {
         assertEquals("updatedMobileNumber", studentResponse.getMobileNumber());
     }
 
+
+    @Test
+    public void testUpdateStudentWithIllegalArgumentException() {
+        StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setFirstName("firstName");
+        studentRequest.setLastName("lastName");
+        studentRequest.setEmail("email");
+        studentRequest.setMobileNumber("updatedMobileNumber");
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+            studentService.updateStudent(studentRequest);
+        });
+        assertEquals("studentId is required.", illegalArgumentException.getMessage());
+
+    }
+    @Test
+    public void testUpdateStudentWithResourceNotFoundException() {
+        StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setStudentId("id");
+        studentRequest.setFirstName("firstName");
+        studentRequest.setLastName("lastName");
+        studentRequest.setEmail("email");
+        studentRequest.setMobileNumber("updatedMobileNumber");
+
+        when(studentRepository.findById(any())).thenReturn(java.util.Optional.empty());
+
+        ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
+            studentService.updateStudent(studentRequest);
+        });
+        assertEquals("student not found.", resourceNotFoundException.getMessage());
+
+    }
+    @Test
+    public void testUpdateStudentWithDataNotModifiedException(){
+        StudentRequest studentRequest = new StudentRequest();
+        studentRequest.setStudentId("id");
+        studentRequest.setFirstName("firstName");
+        studentRequest.setLastName("lastName");
+        studentRequest.setEmail("email");
+        studentRequest.setMobileNumber("mobileNumber");
+
+        Student student = new Student();
+        student.setId("id");
+        student.setFirstName("firstName");
+        student.setLastName("lastName");
+        student.setEmail("email");
+        student.setMobileNumber("mobileNumber");
+
+        when(studentRepository.findById(any())).thenReturn(java.util.Optional.of(student));
+
+        DataNotModifiedException dataNotModifiedException = assertThrows(DataNotModifiedException.class, () -> {
+            studentService.updateStudent(studentRequest);
+        });
+        assertEquals("Data not modified because it is the same in the database.", dataNotModifiedException.getMessage());
+
+    }
+
     @Test
     public void testDeleteStudent() {
         Student student = new Student();
@@ -114,6 +194,24 @@ class StudentServiceApplicationTests {
 
         verify(studentRepository, times(1)).findById(any());
         verify(studentRepository, times(1)).deleteById(any());
+    }
+
+    @Test
+    public void testDeleteStudentWithIllegalArgumentException() {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+            studentService.deleteStudent(null);
+        });
+        assertEquals("studentId is required.", illegalArgumentException.getMessage());
+    }
+
+    @Test
+    public void testDeleteStudentWithResourceNotFoundException() {
+        when(studentRepository.findById(any())).thenReturn(java.util.Optional.empty());
+
+        ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
+            studentService.deleteStudent("id");
+        });
+        assertEquals("student not found.", resourceNotFoundException.getMessage());
     }
 
     @Test
@@ -135,6 +233,24 @@ class StudentServiceApplicationTests {
         assertEquals("lastName", studentResponse.getLastName());
         assertEquals("email", studentResponse.getEmail());
         assertEquals("mobileNumber", studentResponse.getMobileNumber());
+    }
+
+    @Test
+    public void testGetStudentByIdWithIllegalArgumentException() {
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
+            studentService.getStudentById(null);
+        });
+        assertEquals("studentId is required.", illegalArgumentException.getMessage());
+    }
+
+    @Test
+    public void testGetStudentByIdWithResourceNotFoundException() {
+        when(studentRepository.findById(any())).thenReturn(java.util.Optional.empty());
+
+        ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> {
+            studentService.getStudentById("id");
+        });
+        assertEquals("student not found.", resourceNotFoundException.getMessage());
     }
 
 
@@ -169,6 +285,7 @@ class StudentServiceApplicationTests {
 
         verify(studentRepository, times(1)).findAll(pageable);
     }
+
 
 
 
